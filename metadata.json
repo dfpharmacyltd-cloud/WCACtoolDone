@@ -1,0 +1,6 @@
+{
+  "name": "Smart Tax Invoice Scanner & Automatic Excel Entry System",
+  "description": "AI-powered pharmaceutical tax invoice scanning, vendor intelligence, OCR extraction, and automated Excel entry system.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

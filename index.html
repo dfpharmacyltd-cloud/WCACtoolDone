@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Tax Invoice Scanner &amp; Automatic Excel Entry System</title>
+    <meta name="description" content="AI-powered pharmaceutical tax invoice scanning, vendor intelligence, OCR extraction, and automated Excel entry system." />
+    <meta property="og:title" content="Smart Tax Invoice Scanner &amp; Automatic Excel Entry System" />
+    <meta property="og:description" content="AI-powered pharmaceutical tax invoice scanning, vendor intelligence, OCR extraction, and automated Excel entry system." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Safeguard against libraries (e.g. formdata-polyfill) attempting direct assignment to window.fetch
+      (function() {
+        try {
+          var originalFetch = window.fetch;
+          if (originalFetch) {
+            var currentFetch = originalFetch.bind(window);
+            Object.defineProperty(window, 'fetch', {
+              get: function() { return currentFetch; },
+              set: function(fn) { currentFetch = fn; },
+              configurable: true,
+              enumerable: true
+            });
+          }
+        } catch (e) {
+          console.warn('Custom fetch property setter setup skipped:', e);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
