@@ -391,3 +391,80 @@ export const fetchRecentGoogleSheets = async (token: string): Promise<GoogleSpre
     return [];
   }
 };
+
+/**
+ * Standard Google Apps Script template code that the user can copy into their Google Sheet's
+ * Extensions -> Apps Script editor to enable zero-configuration webhook sync on Vercel without OAuth domain whitelist issues.
+ */
+export const APPS_SCRIPT_TEMPLATE = `function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Tax Invoices') || ss.getActiveSheet();
+    
+    // Add 9-column headers if the sheet is empty
+    if (sheet.getLastRow() === 0) {
+      var headers = [
+        'SR No', 'Department', 'Invoice No', 'Company Name', 
+        'Invoice Date', 'GST No', 'Invoice Amount', 'Purchase Category', 'Entry Date'
+      ];
+      sheet.appendRow(headers);
+      sheet.getRange(1, 1, 1, headers.length).setBackground('#047857').setFontColor('#FFFFFF').setFontWeight('bold');
+    }
+    
+    // Append rows
+    if (data.invoices && data.invoices.length > 0) {
+      data.invoices.forEach(function(row) {
+        sheet.appendRow(row);
+      });
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'success',
+      received: data.invoices ? data.invoices.length : 0
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+/**
+ * Syncs invoices to Google Sheets via an Apps Script Webhook.
+ * This works on any domain (including Vercel, Netlify, Custom Domains) without any OAuth setup!
+ */
+export const syncInvoicesViaWebhook = async (
+  webhookUrl: string,
+  invoices: InvoiceRecord[]
+): Promise<{ success: boolean; rowCount: number }> => {
+  const cleanUrl = webhookUrl.trim();
+  if (!cleanUrl.startsWith('https://script.google.com/')) {
+    throw new Error('Please enter a valid Google Apps Script URL starting with https://script.google.com/macros/s/...');
+  }
+
+  const rows = invoices.map(invoiceToSheetRow);
+
+  const payload = {
+    action: 'sync_tax_invoices',
+    invoices: rows,
+    totalRecords: invoices.length,
+    timestamp: new Date().toISOString()
+  };
+
+  // Google Apps Script requires text/plain body to avoid CORS preflight options check
+  await fetch(cleanUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return {
+    success: true,
+    rowCount: invoices.length,
+  };
+};
